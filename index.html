@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ポケモン タイプ相性クイズ</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="タイプクイズ">
+<meta name="theme-color" content="#0f1923">
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap');
+  :root {
+    --bg:#0f1923; --surface:#1a2535; --card:#212f45; --border:#2e4060;
+    --accent:#f7c948; --correct:#4cde7b; --wrong:#ff5c6e;
+    --text:#e8f0fe; --muted:#7a91b0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'M PLUS Rounded 1c',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px;background-image:radial-gradient(ellipse at 20% 0%,rgba(247,201,72,.07) 0%,transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(76,222,123,.06) 0%,transparent 60%);}
+  h1{font-size:clamp(1.4rem,4vw,2rem);font-weight:900;letter-spacing:.05em;color:var(--accent);text-shadow:0 0 30px rgba(247,201,72,.4);margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.82rem;margin-bottom:28px;}
+  .tc-ノーマル{background:#9ba09e;} .tc-ほのお{background:#f9734a;} .tc-みず{background:#4d9be6;}
+  .tc-でんき{background:#f7c948;color:#333;} .tc-くさ{background:#5da95d;} .tc-こおり{background:#72cfc0;}
+  .tc-かくとう{background:#d05040;} .tc-どく{background:#a75ec1;} .tc-じめん{background:#d6b360;color:#333;}
+  .tc-ひこう{background:#8fa8d8;} .tc-エスパー{background:#f85888;} .tc-むし{background:#91c121;color:#333;}
+  .tc-いわ{background:#b8a148;color:#333;} .tc-ゴースト{background:#705898;} .tc-ドラゴン{background:#6050c8;}
+  .tc-あく{background:#50413c;} .tc-はがね{background:#6abde0;color:#333;} .tc-フェアリー{background:#f4b8e6;color:#333;}
+  .mode-toggle{display:flex;margin-bottom:16px;border:1px solid var(--border);border-radius:10px;overflow:hidden;width:fit-content;}
+  .mode-btn{padding:8px 20px;font-size:.85rem;font-weight:700;font-family:inherit;background:none;border:none;color:var(--muted);cursor:pointer;transition:background .15s,color .15s;}
+  .mode-btn.active{background:var(--accent);color:#1a1a1a;}
+  #setup{width:100%;max-width:680px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 22px 18px;}
+  #setup h2{font-size:.95rem;color:var(--muted);font-weight:700;margin-bottom:14px;}
+  .type-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+  .type-toggle{display:none;}
+  .type-label{padding:5px 12px;border-radius:20px;font-size:.8rem;font-weight:700;cursor:pointer;color:#fff;opacity:.38;transition:opacity .15s,transform .1s;user-select:none;border:2px solid transparent;}
+  .type-toggle:checked + .type-label{opacity:1;border-color:rgba(255,255,255,.5);transform:scale(1.06);}
+  .btn-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .btn-sm{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 14px;border-radius:8px;font-size:.78rem;font-family:inherit;cursor:pointer;transition:background .15s,color .15s;}
+  .btn-sm:hover{background:var(--border);color:var(--text);}
+  .btn-start{margin-left:auto;background:var(--accent);color:#1a1a1a;border:none;padding:10px 28px;border-radius:10px;font-size:.95rem;font-weight:900;font-family:inherit;cursor:pointer;transition:transform .12s,box-shadow .12s;box-shadow:0 4px 16px rgba(247,201,72,.3);}
+  .btn-start:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(247,201,72,.45);}
+  #quiz{width:100%;max-width:560px;display:none;}
+  .progress-bar-wrap{width:100%;height:6px;background:var(--border);border-radius:3px;margin-bottom:20px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s ease;}
+  .score-row{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-bottom:18px;}
+  .score-row span b{color:var(--text);}
+  .question-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px 24px;text-align:center;margin-bottom:16px;}
+  .q-label{font-size:.75rem;color:var(--muted);margin-bottom:12px;letter-spacing:.06em;}
+  .q-types{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:4px;flex-wrap:wrap;}
+  .type-badge{display:inline-flex;align-items:center;padding:6px 18px;border-radius:20px;font-size:1rem;font-weight:700;color:#fff;}
+  .q-vs{color:var(--muted);font-size:.85rem;}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .choice-btn{background:var(--card);border:2px solid var(--border);color:var(--text);padding:14px 10px;border-radius:12px;font-size:1.1rem;font-weight:900;font-family:inherit;cursor:pointer;transition:background .13s,border-color .13s,transform .1s;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .choice-sub{font-size:.7rem;font-weight:400;color:var(--muted);}
+  .choice-btn:hover:not(:disabled){background:var(--border);border-color:var(--accent);transform:translateY(-2px);}
+  .choice-btn.correct{background:rgba(76,222,123,.2);border-color:var(--correct);color:var(--correct);}
+  .choice-btn.correct .choice-sub{color:var(--correct);}
+  .choice-btn.wrong{background:rgba(255,92,110,.15);border-color:var(--wrong);color:var(--wrong);}
+  .choice-btn:disabled{cursor:default;transform:none;}
+  .feedback{min-height:32px;text-align:center;font-size:.9rem;font-weight:700;padding:6px 0;}
+  .feedback.correct{color:var(--correct);}
+  .feedback.wrong{color:var(--wrong);}
+  .btn-next{width:100%;padding:13px;background:var(--accent);color:#1a1a1a;border:none;border-radius:12px;font-size:1rem;font-weight:900;font-family:inherit;cursor:pointer;margin-top:12px;transition:transform .12s;display:none;}
+  .btn-next:hover{transform:translateY(-2px);}
+  #result{width:100%;max-width:520px;display:none;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 28px;text-align:center;}
+  .result-score{font-size:4rem;font-weight:900;color:var(--accent);line-height:1;margin-bottom:6px;text-shadow:0 0 40px rgba(247,201,72,.5);}
+  .result-label{color:var(--muted);font-size:.9rem;margin-bottom:24px;}
+  .result-rank{font-size:1.6rem;margin-bottom:24px;}
+  .btn-retry{background:var(--accent);color:#1a1a1a;border:none;padding:12px 36px;border-radius:12px;font-size:1rem;font-weight:900;font-family:inherit;cursor:pointer;transition:transform .12s;}
+  .btn-retry:hover{transform:translateY(-2px);}
+  @keyframes pop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  .pop{animation:pop .28s ease forwards;}
+</style>
+</head>
+<body>
+
+<h1>⚡ タイプ相性クイズ</h1>
+<p class="subtitle">タイプを選んで一問一答！</p>
+
+<div id="setup">
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeAtk" onclick="setMode('atk')">⚔️ 攻撃側で出題</button>
+    <button class="mode-btn"        id="modeDef" onclick="setMode('def')">🛡️ 防御側で出題</button>
+  </div>
+  <h2 id="filterLabel">絞り込む攻撃タイプを選ぶ</h2>
+  <div class="type-grid" id="typeGrid"></div>
+  <div class="btn-row">
+    <button class="btn-sm" onclick="selectAll(true)">すべて選択</button>
+    <button class="btn-sm" onclick="selectAll(false)">すべて解除</button>
+    <button class="btn-start" onclick="startQuiz()">スタート ▶</button>
+  </div>
+</div>
+
+<div id="quiz">
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progFill"></div></div>
+  <div class="score-row">
+    <span>問題 <b id="qNum">1</b> / <b id="qTotal">20</b></span>
+    <span>正解 <b id="scoreDisp">0</b></span>
+  </div>
+  <div class="question-card">
+    <div class="q-label">この技のダメージ倍率は？</div>
+    <div class="q-types">
+      <span class="type-badge" id="atkBadge"></span>
+      <span class="q-vs">の技</span>
+      <span class="q-vs">→</span>
+      <span class="type-badge" id="defBadge"></span>
+      <span class="q-vs">に対して</span>
+    </div>
+  </div>
+  <div class="choices" id="choices"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="btn-next" id="btnNext" onclick="nextQuestion()">次の問題 →</button>
+</div>
+
+<div id="result">
+  <div class="result-score" id="finalScore"></div>
+  <div class="result-label" id="finalLabel"></div>
+  <div class="result-rank"  id="finalRank"></div>
+  <button class="btn-retry" onclick="backToSetup()">もう一度 ↺</button>
+</div>
+
+<script>
+var TYPES = ['ノーマル','ほのお','みず','でんき','くさ','こおり','かくとう','どく',
+             'じめん','ひこう','エスパー','むし','いわ','ゴースト','ドラゴン','あく','はがね','フェアリー'];
+
+var CHART = {
+  'ノーマル':  {'いわ':0.5,'ゴースト':0,'はがね':0.5},
+  'ほのお':    {'ほのお':0.5,'みず':0.5,'くさ':2,'こおり':2,'むし':2,'いわ':0.5,'ドラゴン':0.5,'はがね':2},
+  'みず':      {'ほのお':2,'みず':0.5,'くさ':0.5,'じめん':2,'いわ':2,'ドラゴン':0.5},
+  'でんき':    {'みず':2,'でんき':0.5,'くさ':0.5,'じめん':0,'ひこう':2,'ドラゴン':0.5},
+  'くさ':      {'ほのお':0.5,'みず':2,'くさ':0.5,'どく':0.5,'じめん':2,'ひこう':0.5,'むし':0.5,'いわ':2,'ドラゴン':0.5,'はがね':0.5},
+  'こおり':    {'みず':0.5,'くさ':2,'こおり':0.5,'じめん':2,'ひこう':2,'ドラゴン':2,'はがね':0.5},
+  'かくとう':  {'ノーマル':2,'こおり':2,'どく':0.5,'いわ':2,'ゴースト':0,'ひこう':0.5,'エスパー':0.5,'むし':0.5,'あく':2,'はがね':2,'フェアリー':0.5},
+  'どく':      {'くさ':2,'どく':0.5,'じめん':0.5,'いわ':0.5,'ゴースト':0.5,'はがね':0,'フェアリー':2},
+  'じめん':    {'ほのお':2,'でんき':2,'くさ':0.5,'どく':2,'いわ':2,'はがね':2,'むし':0.5,'ひこう':0},
+  'ひこう':    {'でんき':0.5,'くさ':2,'かくとう':2,'むし':2,'いわ':0.5,'はがね':0.5},
+  'エスパー':  {'かくとう':2,'どく':2,'エスパー':0.5,'あく':0,'はがね':0.5},
+  'むし':      {'ほのお':0.5,'くさ':2,'かくとう':0.5,'ひこう':0.5,'エスパー':2,'ゴースト':0.5,'あく':2,'はがね':0.5,'フェアリー':0.5},
+  'いわ':      {'ほのお':2,'こおり':2,'かくとう':0.5,'じめん':0.5,'ひこう':2,'むし':2,'はがね':0.5},
+  'ゴースト':  {'ノーマル':0,'エスパー':2,'ゴースト':2,'あく':0.5},
+  'ドラゴン':  {'ドラゴン':2,'はがね':0.5,'フェアリー':0},
+  'あく':      {'かくとう':0.5,'エスパー':2,'ゴースト':2,'あく':0.5,'フェアリー':0.5},
+  'はがね':    {'ほのお':0.5,'みず':0.5,'でんき':0.5,'こおり':2,'いわ':2,'はがね':0.5,'フェアリー':2},
+  'フェアリー':{'かくとう':2,'ドラゴン':2,'あく':2,'ほのお':0.5,'どく':0.5,'はがね':0.5}
+};
+
+// 倍率を文字列キーとして扱う（0の判定ミスを防ぐ）
+var OPTIONS = [
+  { label:'×',  sub:'0倍（無効）',           key:'0'   },
+  { label:'△',  sub:'½倍（いまひとつ）',     key:'0.5' },
+  { label:'－',  sub:'１倍（ふつう）',         key:'1'   },
+  { label:'○',  sub:'２倍（こうかばつぐん）', key:'2'   }
+];
+
+function getMultKey(atk, def) {
+  var row = CHART[atk];
+  if (!row) return '1';
+  var v = row[def];
+  if (v === undefined) return '1';
+  return String(v);
+}
+
+var questions = [];
+var qIdx = 0;
+var score = 0;
+var answered = false;
+var quizMode = 'atk';
+
+// タイプ選択UI生成
+var grid = document.getElementById('typeGrid');
+for (var i = 0; i < TYPES.length; i++) {
+  var t = TYPES[i];
+  var inp = document.createElement('input');
+  inp.type = 'checkbox';
+  inp.className = 'type-toggle';
+  inp.id = 'chk-' + t;
+  inp.value = t;
+  inp.checked = true;
+  var lbl = document.createElement('label');
+  lbl.htmlFor = 'chk-' + t;
+  lbl.className = 'type-label tc-' + t;
+  lbl.textContent = t;
+  grid.appendChild(inp);
+  grid.appendChild(lbl);
+}
+
+function setMode(m) {
+  quizMode = m;
+  document.getElementById('modeAtk').className = 'mode-btn' + (m === 'atk' ? ' active' : '');
+  document.getElementById('modeDef').className  = 'mode-btn' + (m === 'def' ? ' active' : '');
+  document.getElementById('filterLabel').textContent =
+    (m === 'atk') ? '絞り込む攻撃タイプを選ぶ' : '絞り込む防御タイプを選ぶ';
+}
+
+function selectAll(v) {
+  for (var i = 0; i < TYPES.length; i++) {
+    document.getElementById('chk-' + TYPES[i]).checked = v;
+  }
+}
+
+function getChecked() {
+  var result = [];
+  for (var i = 0; i < TYPES.length; i++) {
+    if (document.getElementById('chk-' + TYPES[i]).checked) result.push(TYPES[i]);
+  }
+  return result;
+}
+
+function shuffle(a) {
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function startQuiz() {
+  var selected = getChecked();
+  if (selected.length === 0) { alert('1つ以上タイプを選んでください'); return; }
+  var pool = [];
+  if (quizMode === 'atk') {
+    for (var i = 0; i < selected.length; i++)
+      for (var j = 0; j < TYPES.length; j++)
+        pool.push({ atk: selected[i], def: TYPES[j] });
+  } else {
+    for (var i = 0; i < selected.length; i++)
+      for (var j = 0; j < TYPES.length; j++)
+        pool.push({ atk: TYPES[j], def: selected[i] });
+  }
+  shuffle(pool);
+  questions = pool.slice(0, 20);
+  qIdx = 0; score = 0; answered = false;
+  document.getElementById('qTotal').textContent = questions.length;
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  var q = questions[qIdx];
+  var correctKey = getMultKey(q.atk, q.def);
+
+  document.getElementById('qNum').textContent = qIdx + 1;
+  document.getElementById('scoreDisp').textContent = score;
+  document.getElementById('progFill').style.width = (qIdx / questions.length * 100) + '%';
+
+  var ab = document.getElementById('atkBadge');
+  ab.textContent = q.atk; ab.className = 'type-badge tc-' + q.atk;
+  var db = document.getElementById('defBadge');
+  db.textContent = q.def; db.className = 'type-badge tc-' + q.def;
+
+  var wrap = document.getElementById('choices');
+  wrap.innerHTML = '';
+  for (var i = 0; i < OPTIONS.length; i++) {
+    (function(opt) {
+      var btn = document.createElement('button');
+      btn.className = 'choice-btn pop';
+      btn.setAttribute('data-key', opt.key);
+      btn.innerHTML = '<span>' + opt.label + '</span><span class="choice-sub">' + opt.sub + '</span>';
+      btn.onclick = function() { answer(this, correctKey); };
+      wrap.appendChild(btn);
+    })(OPTIONS[i]);
+  }
+
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('btnNext').style.display = 'none';
+}
+
+function answer(clickedBtn, correctKey) {
+  if (answered) return;
+  answered = true;
+
+  var chosenKey = clickedBtn.getAttribute('data-key');
+  var isCorrect = (chosenKey === correctKey);
+  if (isCorrect) score++;
+  document.getElementById('scoreDisp').textContent = score;
+
+  var allBtns = document.getElementById('choices').getElementsByClassName('choice-btn');
+  for (var i = 0; i < allBtns.length; i++) {
+    var btn = allBtns[i];
+    btn.disabled = true;
+    if (btn.getAttribute('data-key') === correctKey) {
+      btn.classList.add('correct');
+    } else if (btn === clickedBtn) {
+      btn.classList.add('wrong');
+    }
+  }
+
+  var fb = document.getElementById('feedback');
+  if (isCorrect) {
+    fb.textContent = '✓ 正解！';
+    fb.className = 'feedback correct';
+  } else {
+    var correctOpt = null;
+    for (var i = 0; i < OPTIONS.length; i++) {
+      if (OPTIONS[i].key === correctKey) { correctOpt = OPTIONS[i]; break; }
+    }
+    fb.textContent = '✗ 不正解… 正解は「' + correctOpt.label + '」(' + correctOpt.sub + ')';
+    fb.className = 'feedback wrong';
+  }
+
+  var btnNext = document.getElementById('btnNext');
+  btnNext.textContent = (qIdx + 1 >= questions.length) ? '結果を見る ✓' : '次の問題 →';
+  btnNext.style.display = 'block';
+}
+
+function nextQuestion() {
+  qIdx++;
+  if (qIdx >= questions.length) { showResult(); return; }
+  showQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+  var total = questions.length;
+  var pct = score / total;
+  document.getElementById('finalScore').textContent = score + ' / ' + total;
+  document.getElementById('finalLabel').textContent = '正解率 ' + Math.round(pct * 100) + '%';
+  var rank = '';
+  if      (pct === 1)  rank = '🏆 パーフェクト！タイプマスター！';
+  else if (pct >= 0.8) rank = '🌟 すばらしい！';
+  else if (pct >= 0.6) rank = '👍 なかなかよい！';
+  else if (pct >= 0.4) rank = '😅 まだまだ修行が必要…';
+  else                 rank = '💦 タイプ表を見直そう！';
+  document.getElementById('finalRank').textContent = rank;
+}
+
+function backToSetup() {
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('setup').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
