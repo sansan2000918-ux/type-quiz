@@ -101,9 +101,31 @@
   td.cell.eff1 {background:rgba(255,255,255,.03);color:rgba(255,255,255,.18);}
 
   /* highlight on hover via JS class */
-  td.cell.hl-row,td.cell.hl-col{filter:brightness(1.6);outline:1px solid rgba(255,255,255,.4);}
-  td.cell.hl-both{filter:brightness(2);outline:2px solid #fff;z-index:1;position:relative;}
-  th.hl-hdr .hdr-inner{outline:2px solid #fff;border-radius:4px;}
+  /* 行・列・交差・ヘッダー の色は JS で CSS変数として付与する */
+  td.cell.hl-row{
+    filter:brightness(1.6);
+    outline:2px solid var(--hl-atk-color, rgba(255,255,255,.5));
+    outline-offset:-1px;
+  }
+  td.cell.hl-col{
+    filter:brightness(1.6);
+    outline:2px solid var(--hl-def-color, rgba(255,255,255,.5));
+    outline-offset:-1px;
+  }
+  td.cell.hl-both{
+    filter:brightness(2.1);
+    z-index:1;
+    position:relative;
+    outline:none;
+    /* 上下辺=攻撃色、左右辺=防御色 を box-shadow で表現 */
+    box-shadow:
+      0 -2px 0 0 var(--hl-atk-color, #fff),   /* 上辺 */
+      0  2px 0 0 var(--hl-atk-color, #fff),   /* 下辺 */
+      -2px 0 0 0 var(--hl-def-color, #fff),   /* 左辺 */
+       2px 0 0 0 var(--hl-def-color, #fff);   /* 右辺 */
+  }
+  th.hl-hdr-atk .hdr-inner{outline:2px solid var(--hl-atk-color, #fff);border-radius:4px;}
+  th.hl-hdr-def .hdr-inner{outline:2px solid var(--hl-def-color, #fff);border-radius:4px;}
 
   /* dim non-selected */
   table.ct.grayout tr.row-dim td.cell,table.ct.grayout tr.row-dim th.hdr-atk{opacity:.4;}
@@ -429,24 +451,69 @@ function renderChart(){
   else tbl.classList.remove('hide-unsel');
 }
 
+// タイプ固有色マップ（CSS の .tc-* background に対応）
+var TYPE_COLOR={
+  'ノーマル': '#9ba09e',
+  'ほのお':   '#f9734a',
+  'みず':     '#4d9be6',
+  'でんき':   '#f7c948',
+  'くさ':     '#5da95d',
+  'こおり':   '#72cfc0',
+  'かくとう': '#d05040',
+  'どん':     '#a75ec1',
+  'どく':     '#a75ec1',
+  'じめん':   '#d6b360',
+  'ひこう':   '#8fa8d8',
+  'エスパー': '#f85888',
+  'むし':     '#91c121',
+  'いわ':     '#b8a148',
+  'ゴースト': '#705898',
+  'ドラゴン': '#6050c8',
+  'あく':     '#50413c',
+  'はがね':   '#6abde0',
+  'フェアリー':'#f4b8e6'
+};
+
 var lastA=-1,lastD=-1;
 function clearHighlight(){
   if(lastA>=0&&lastD>=0){
     for(var d=0;d<TYPES.length;d++){var c=cellMap[lastA][d];if(c){c.classList.remove('hl-row','hl-both');}}
     for(var a=0;a<TYPES.length;a++){var c=cellMap[a][lastD];if(c){c.classList.remove('hl-col','hl-both');}}
-    if(atkHdrMap[lastA])atkHdrMap[lastA].classList.remove('hl-hdr');
-    if(defHdrMap[lastD])defHdrMap[lastD].classList.remove('hl-hdr');
+    if(atkHdrMap[lastA])atkHdrMap[lastA].classList.remove('hl-hdr-atk');
+    if(defHdrMap[lastD])defHdrMap[lastD].classList.remove('hl-hdr-def');
     lastA=-1;lastD=-1;
   }
 }
 function applyHighlight(a,d){
   clearHighlight();
   lastA=a;lastD=d;
-  for(var dd=0;dd<TYPES.length;dd++){var c=cellMap[a][dd];if(c&&dd!==d)c.classList.add('hl-row');}
-  for(var aa=0;aa<TYPES.length;aa++){var c=cellMap[aa][d];if(c&&aa!==a)c.classList.add('hl-col');}
-  if(cellMap[a][d])cellMap[a][d].classList.add('hl-both');
-  if(atkHdrMap[a])atkHdrMap[a].classList.add('hl-hdr');
-  if(defHdrMap[d])defHdrMap[d].classList.add('hl-hdr');
+  var atkColor=TYPE_COLOR[TYPES[a]]||'rgba(255,255,255,.6)';
+  var defColor=TYPE_COLOR[TYPES[d]]||'rgba(255,255,255,.6)';
+  // 行ハイライト（攻撃色）
+  for(var dd=0;dd<TYPES.length;dd++){
+    var c=cellMap[a][dd];
+    if(c&&dd!==d){
+      c.style.setProperty('--hl-atk-color',atkColor);
+      c.classList.add('hl-row');
+    }
+  }
+  // 列ハイライト（防御色）
+  for(var aa=0;aa<TYPES.length;aa++){
+    var c=cellMap[aa][d];
+    if(c&&aa!==a){
+      c.style.setProperty('--hl-def-color',defColor);
+      c.classList.add('hl-col');
+    }
+  }
+  // 交差セル（両色）
+  if(cellMap[a][d]){
+    cellMap[a][d].style.setProperty('--hl-atk-color',atkColor);
+    cellMap[a][d].style.setProperty('--hl-def-color',defColor);
+    cellMap[a][d].classList.add('hl-both');
+  }
+  // ヘッダー
+  if(atkHdrMap[a]){atkHdrMap[a].style.setProperty('--hl-atk-color',atkColor);atkHdrMap[a].classList.add('hl-hdr-atk');}
+  if(defHdrMap[d]){defHdrMap[d].style.setProperty('--hl-def-color',defColor);defHdrMap[d].classList.add('hl-hdr-def');}
 }
 function onCellEnter(e){
   var td=e.currentTarget;
