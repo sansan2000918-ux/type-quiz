@@ -18,49 +18,14 @@
 
   <div id="appHeader">
     <span id="appTitle">⚡ タイプ相性表</span>
-
     <div id="controls">
-
-      <!-- 攻撃/防御 トグルボタン（現在の状態を表示） -->
-      <button id="btnMode" class="btn-sm btn-toggle" onclick="toggleMode()">⚔️ 攻撃</button>
-
-      <!-- グレーアウト/選択のみ トグルボタン -->
-      <button id="btnFilter" class="btn-sm btn-toggle" onclick="toggleFilter()">グレーアウト</button>
-
-      <!-- タイプ選択ドロップダウン -->
-      <div class="select-wrap">
-        <select id="typeSelect" multiple onchange="onSelectChange()">
-          <option value="ノーマル">ノーマル</option>
-          <option value="ほのお">ほのお</option>
-          <option value="みず">みず</option>
-          <option value="でんき">でんき</option>
-          <option value="くさ">くさ</option>
-          <option value="こおり">こおり</option>
-          <option value="かくとう">かくとう</option>
-          <option value="どく">どく</option>
-          <option value="じめん">じめん</option>
-          <option value="ひこう">ひこう</option>
-          <option value="エスパー">エスパー</option>
-          <option value="むし">むし</option>
-          <option value="いわ">いわ</option>
-          <option value="ゴースト">ゴースト</option>
-          <option value="ドラゴン">ドラゴン</option>
-          <option value="あく">あく</option>
-          <option value="はがね">はがね</option>
-          <option value="フェアリー">フェアリー</option>
-        </select>
-        <span class="select-hint" id="selectHint">0 / 18 選択中</span>
-      </div>
-
-      <!-- 全選択/解除トグルボタン -->
-      <button id="btnToggleAll" class="btn-sm" onclick="toggleAllTypes()">全選択</button>
-
-      <!-- クイズスタート -->
-      <button class="btn-start" onclick="startQuiz()">▶ クイズ</button>
+      <button id="btnMode"      class="btn-sm btn-toggle" onclick="toggleMode()">⚔️ 攻撃</button>
+      <button id="btnFilter"    class="btn-sm btn-toggle" onclick="toggleFilter()">グレーアウト</button>
+      <button id="btnToggleAll" class="btn-sm"            onclick="toggleAllTypes()">全選択</button>
+      <button class="btn-start"                           onclick="startQuiz()">▶ クイズ</button>
     </div>
   </div>
 
-  <!-- 凡例 + セル情報バー -->
   <div id="infoBar">
     <div class="chart-legend">
       <div class="legend-item"><div class="legend-box eff2-box"></div><span>○ 2倍</span></div>
@@ -71,7 +36,6 @@
     <div id="cellInfo"></div>
   </div>
 
-  <!-- 相性表本体 -->
   <div class="chart-table-wrap" id="chartTableWrap">
     <table class="ct" id="chartTable"></table>
   </div>

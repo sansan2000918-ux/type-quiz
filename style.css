@@ -92,45 +92,6 @@ body {
   flex-shrink: 0;
 }
 
-/* ── セレクトボックス ── */
-.select-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  flex-shrink: 0;
-}
-#typeSelect {
-  font-family: inherit;
-  font-size: .72rem;
-  font-weight: 700;
-  background: var(--card);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 2px 4px;
-  height: 34px;
-  width: 110px;
-  cursor: pointer;
-  outline: none;
-  appearance: none;
-  overflow-y: auto;
-}
-#typeSelect option {
-  padding: 2px 4px;
-  background: var(--card);
-  color: var(--text);
-}
-#typeSelect option:checked {
-  background: var(--accent);
-  color: #1a1a1a;
-}
-.select-hint {
-  font-size: .62rem;
-  color: var(--muted);
-  margin-top: 1px;
-  line-height: 1;
-}
-
 /* ── ボタン共通 ── */
 .btn-sm {
   background: none;

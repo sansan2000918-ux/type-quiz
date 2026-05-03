@@ -90,43 +90,38 @@ function shuffle(a) {
 }
 
 // ══════════════════════════════════════════
-//  セレクトボックス操作
+//  タイプ選択状態（配列で管理）
 // ══════════════════════════════════════════
 
+var selectedTypes = [];  // 選択中タイプの配列
+
 function getSelected() {
-  var sel = document.getElementById('typeSelect');
-  var result = [];
-  for (var i = 0; i < sel.options.length; i++)
-    if (sel.options[i].selected) result.push(sel.options[i].value);
-  return result;
+  return selectedTypes;
 }
 
-function setSelected(types) {
-  var sel = document.getElementById('typeSelect');
-  for (var i = 0; i < sel.options.length; i++)
-    sel.options[i].selected = (types.indexOf(sel.options[i].value) >= 0);
-  updateSelectHint();
-  renderChart();
-}
-
-function updateSelectHint() {
-  var n = getSelected().length;
-  document.getElementById('selectHint').textContent = n + ' / 18 選択中';
-  // トグルボタンのラベル更新
+function updateToggleAllBtn() {
   var btn = document.getElementById('btnToggleAll');
-  btn.textContent = (n === TYPES.length) ? '全解除' : '全選択';
-  btn.className   = 'btn-sm' + (n === TYPES.length ? ' active' : '');
-}
-
-function onSelectChange() {
-  updateSelectHint();
-  renderChart();
+  var allSel = (selectedTypes.length === TYPES.length);
+  btn.textContent = allSel ? '全解除' : '全選択';
+  btn.className   = 'btn-sm' + (allSel ? ' active' : '');
 }
 
 function toggleAllTypes() {
-  var n = getSelected().length;
-  var doSelectAll = (n < TYPES.length);
-  setSelected(doSelectAll ? TYPES : []);
+  if (selectedTypes.length === TYPES.length) {
+    selectedTypes = [];
+  } else {
+    selectedTypes = TYPES.slice();
+  }
+  updateToggleAllBtn();
+  renderChart();
+}
+
+function toggleType(t) {
+  var idx = selectedTypes.indexOf(t);
+  if (idx >= 0) selectedTypes.splice(idx, 1);
+  else          selectedTypes.push(t);
+  updateToggleAllBtn();
+  renderChart();
 }
 
 // ══════════════════════════════════════════
