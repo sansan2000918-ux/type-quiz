@@ -157,12 +157,25 @@ function applyTableClasses() {
 //  相性表レンダリング
 // ══════════════════════════════════════════
 
+// 選択数に応じたセルサイズを計算する
+function calcCellSize(selCount) {
+  var base = 30, max = 56;
+  if (selCount === 0) return base;
+  var size = Math.round(max - (max - base) * (selCount / TYPES.length));
+  return Math.max(base, Math.min(max, size));
+}
+
 function renderChart() {
   var selected = getSelected();
   var hasSelection = selected.length > 0;
   var tbl = document.getElementById('chartTable');
   tbl.innerHTML = '';
   cellMap = {}; atkHdrMap = {}; defHdrMap = {};
+
+  // 選択数に応じたサイズ計算（モードに応じて行/列どちらを拡大するか）
+  var cellSize = calcCellSize(selected.length);
+  var rowH = (chartMode === 'atk' && hasSelection) ? cellSize : 30;
+  var colW = (chartMode === 'def' && hasSelection) ? cellSize : 30;
 
   // ── thead ──
   var thead = document.createElement('thead');
@@ -180,6 +193,8 @@ function renderChart() {
     var dimDef = hasSelection && (chartMode === 'def' && !selDef);
     th.className = 'hdr-def' + (dimDef ? ' col-dim hdr-off' : '');
     th.id = 'dhdr-' + d;
+    th.style.width    = colW + 'px';
+    th.style.minWidth = colW + 'px';
 
     var inner = document.createElement('span');
     inner.className = 'hdr-inner tc-' + def;
@@ -201,10 +216,12 @@ function renderChart() {
   for (var a = 0; a < TYPES.length; a++) {
     var atk = TYPES[a];
     var selAtk = (selected.indexOf(atk) >= 0);
-    var dimAtk = hasSelection && (chartMode === 'atk' && !selAtk);
+    // 攻撃モードで何か選択中: 未選択行はdim
+    var dimAtk = hasSelection && (chartMode === 'atk') && !selAtk;
 
     var tr = document.createElement('tr');
     if (dimAtk) tr.classList.add('row-dim');
+    tr.style.height = rowH + 'px';
     cellMap[a] = {};
 
     var ath = document.createElement('th');
@@ -226,10 +243,13 @@ function renderChart() {
     for (var d2 = 0; d2 < TYPES.length; d2++) {
       var def2   = TYPES[d2];
       var selDef2 = (selected.indexOf(def2) >= 0);
-      var dimDef2 = hasSelection && (chartMode === 'def' && !selDef2);
+      var dimDef2 = hasSelection && (chartMode === 'def') && !selDef2;
 
       var td = document.createElement('td');
       td.className = 'cell' + (dimDef2 ? ' col-dim' : '');
+      td.style.width    = colW + 'px';
+      td.style.minWidth = colW + 'px';
+      td.style.height   = rowH + 'px';
 
       var v = (CHART[atk] && CHART[atk][def2] !== undefined) ? CHART[atk][def2] : 1;
       var sym = '－', cls = 'eff1';
