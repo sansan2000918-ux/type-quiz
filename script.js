@@ -153,8 +153,9 @@ function setFilterMode(isHideUnsel) {
 
 function applyTableClasses() {
   var tbl = document.getElementById('chartTable');
-  tbl.classList.toggle('hide-unsel', hideUnsel);
-  tbl.classList.toggle('grayout',    grayout);
+  var hasSelection = getSelected().length > 0;
+  tbl.classList.toggle('hide-unsel', hasSelection && hideUnsel);
+  tbl.classList.toggle('grayout',    hasSelection && grayout);
 }
 
 // ══════════════════════════════════════════
@@ -163,6 +164,7 @@ function applyTableClasses() {
 
 function renderChart() {
   var selected = getSelected();
+  var hasSelection = selected.length > 0;
   var tbl = document.getElementById('chartTable');
   tbl.innerHTML = '';
   cellMap = {}; atkHdrMap = {}; defHdrMap = {};
@@ -180,7 +182,7 @@ function renderChart() {
     var def = TYPES[d];
     var th  = document.createElement('th');
     var selDef = (selected.indexOf(def) >= 0);
-    var dimDef = (chartMode === 'def' && !selDef);
+    var dimDef = hasSelection && (chartMode === 'def' && !selDef);
     th.className = 'hdr-def' + (dimDef ? ' col-dim hdr-off' : '');
     th.id = 'dhdr-' + d;
 
@@ -204,7 +206,7 @@ function renderChart() {
   for (var a = 0; a < TYPES.length; a++) {
     var atk = TYPES[a];
     var selAtk = (selected.indexOf(atk) >= 0);
-    var dimAtk = (chartMode === 'atk' && !selAtk);
+    var dimAtk = hasSelection && (chartMode === 'atk' && !selAtk);
 
     var tr = document.createElement('tr');
     if (dimAtk) tr.classList.add('row-dim');
@@ -229,7 +231,7 @@ function renderChart() {
     for (var d2 = 0; d2 < TYPES.length; d2++) {
       var def2   = TYPES[d2];
       var selDef2 = (selected.indexOf(def2) >= 0);
-      var dimDef2 = (chartMode === 'def' && !selDef2);
+      var dimDef2 = hasSelection && (chartMode === 'def' && !selDef2);
 
       var td = document.createElement('td');
       td.className = 'cell' + (dimDef2 ? ' col-dim' : '');

@@ -39,15 +39,15 @@ body {
 /* ── ヘッダー ── */
 #appHeader {
   flex-shrink: 0;
-  height: var(--header-h);
+  min-height: var(--header-h);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  padding: 0 12px;
+  gap: 8px;
+  padding: 6px 12px;
   overflow-x: auto;
-  overflow-y: hidden;
   scrollbar-width: none;
 }
 #appHeader::-webkit-scrollbar { display: none; }
@@ -64,9 +64,10 @@ body {
 
 #controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
+  gap: 8px;
+  flex: 1;
 }
 
 /* ── トグルスイッチ ── */
