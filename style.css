@@ -190,6 +190,7 @@ body {
 table.ct {
   border-collapse: collapse;
   table-layout: fixed;
+  width: 100%;
 }
 
 /* corner */

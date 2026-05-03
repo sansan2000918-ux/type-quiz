@@ -149,8 +149,9 @@ function toggleFilter() {
 function applyTableClasses() {
   var tbl = document.getElementById('chartTable');
   var hasSelection = getSelected().length > 0;
-  tbl.classList.toggle('hide-unsel', hasSelection && hideUnsel);
-  // grayout: 攻撃モードは常時（全解除でも全行dim）、防御モードは選択中のみ
+  // hide-unsel: 「選択のみ」モードのとき常に適用（全解除なら全行消える）
+  tbl.classList.toggle('hide-unsel', hideUnsel);
+  // grayout: 攻撃モードは常時、防御モードは選択中のみ
   tbl.classList.toggle('grayout',
     grayout && (chartMode === 'atk' || hasSelection)
   );
@@ -213,7 +214,8 @@ function renderChart() {
   for (var a = 0; a < TYPES.length; a++) {
     var atk = TYPES[a];
     var selAtk = (selected.indexOf(atk) >= 0);
-    // 攻撃モード: 未選択はdim。全解除(hasSelection=false)のときも全行dim
+    // 攻撃モード: 未選択はdim（hdr-offで薄く、hide-unselで非表示）
+    // 選択されていればdimなし
     var dimAtk = (chartMode === 'atk') && !selAtk;
 
     var tr = document.createElement('tr');
