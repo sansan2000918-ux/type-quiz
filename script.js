@@ -96,7 +96,7 @@ function shuffle(a) {
 var selectedTypes = [];  // 選択中タイプの配列
 
 function getSelected() {
-  return selectedTypes;
+  return selectedTypes.slice();
 }
 
 function updateToggleAllBtn() {
@@ -108,9 +108,10 @@ function updateToggleAllBtn() {
 
 function toggleAllTypes() {
   if (selectedTypes.length === TYPES.length) {
-    selectedTypes = [];
+    selectedTypes.length = 0;
   } else {
-    selectedTypes = TYPES.slice();
+    selectedTypes.length = 0;
+    for (var i = 0; i < TYPES.length; i++) selectedTypes.push(TYPES[i]);
   }
   updateToggleAllBtn();
   renderChart();
