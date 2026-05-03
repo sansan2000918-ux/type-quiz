@@ -13,98 +13,126 @@
 </head>
 <body>
 
-<h1>⚡ タイプ相性クイズ</h1>
-<p class="subtitle">タイプを選んで一問一答！</p>
+<!-- ══════════════════════════════════════════
+     メイン画面（相性表）
+════════════════════════════════════════════ -->
+<div id="mainView">
 
-<!-- ── セットアップ ── -->
-<div id="setup">
-  <div class="sw-pair" style="margin-bottom:16px;">
-    <span class="sw-lbl on" id="lbl-modeAtk">⚔️ 攻撃側で出題</span>
-    <label class="sw-wrap">
-      <input type="checkbox" id="modeSw" onchange="setMode(this.checked?'def':'atk')">
-      <span class="sw-track"></span>
-    </label>
-    <span class="sw-lbl" id="lbl-modeDef">🛡️ 防御側で出題</span>
-  </div>
-  <h2 id="filterLabel">絞り込む攻撃タイプを選ぶ</h2>
-  <div class="type-grid" id="typeGrid"></div>
-  <button class="btn-chart" onclick="openChart()">📊 相性表を確認する</button>
-  <div class="btn-row">
-    <button class="btn-sm" onclick="selectAll(true)">すべて選択</button>
-    <button class="btn-sm" onclick="selectAll(false)">すべて解除</button>
-    <button class="btn-start" onclick="startQuiz()">クイズスタート ▶</button>
-  </div>
-</div>
+  <!-- ヘッダー -->
+  <div id="appHeader">
+    <span id="appTitle">⚡ タイプ相性表</span>
 
-<!-- ── 相性表オーバーレイ ── -->
-<div id="chartOverlay" onclick="closeChartOutside(event)">
-  <div class="chart-wrap">
-    <button class="chart-close" onclick="closeChart()">✕</button>
-    <div class="chart-title">タイプ相性表　　セルにタッチで詳細表示</div>
-    <div class="landscape-controls" style="text-align:center;flex-shrink:0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;">
-      <div style="display:flex;gap:16px;flex-shrink:0;align-items:center;flex-wrap:wrap;justify-content:center;">
-        <!-- 攻撃/防御スイッチ -->
-        <div class="sw-pair">
-          <span class="sw-lbl on" id="lbl-chartAtk">⚔️ 攻撃</span>
-          <label class="sw-wrap">
-            <input type="checkbox" id="chartModeSw" onchange="setChartMode(this.checked?'def':'atk')">
-            <span class="sw-track"></span>
-          </label>
-          <span class="sw-lbl" id="lbl-chartDef">🛡️ 防御</span>
-        </div>
-        <!-- 選択のみ/グレーアウトスイッチ -->
-        <div class="sw-pair">
-          <span class="sw-lbl on" id="lbl-hideUnsel">選択のみ</span>
-          <label class="sw-wrap">
-            <input type="checkbox" id="filterSw" onchange="setFilterMode(this.checked)">
-            <span class="sw-track"></span>
-          </label>
-          <span class="sw-lbl" id="lbl-grayout">グレーアウト</span>
-        </div>
+    <div id="controls">
+
+      <!-- トグルペア1：攻撃 ⇔ 防御 -->
+      <div class="sw-pair">
+        <span class="sw-lbl on" id="lbl-modeAtk">⚔️ 攻撃</span>
+        <label class="sw-wrap">
+          <input type="checkbox" id="modeSw" onchange="setMode(this.checked?'def':'atk')">
+          <span class="sw-track"></span>
+        </label>
+        <span class="sw-lbl" id="lbl-modeDef">🛡️ 防御</span>
       </div>
-      <div class="chart-legend" style="margin-bottom:0;">
-        <div class="legend-item"><div class="legend-box" style="background:rgba(76,222,123,.5)"></div><span>○ 2倍</span></div>
-        <div class="legend-item"><div class="legend-box" style="background:rgba(247,180,60,.45)"></div><span>△ ½倍</span></div>
-        <div class="legend-item"><div class="legend-box" style="background:rgba(255,92,110,.5)"></div><span>× 無効</span></div>
-        <div class="legend-item"><div class="legend-box" style="background:rgba(255,255,255,.06)"></div><span>－ 等倍</span></div>
+
+      <!-- トグルペア2：グレーアウト ⇔ 選択のみ -->
+      <div class="sw-pair">
+        <span class="sw-lbl on" id="lbl-grayout">グレーアウト</span>
+        <label class="sw-wrap">
+          <input type="checkbox" id="filterSw" onchange="setFilterMode(this.checked)">
+          <span class="sw-track"></span>
+        </label>
+        <span class="sw-lbl" id="lbl-hideUnsel">選択のみ</span>
+      </div>
+
+      <!-- タイプ選択ドロップダウン -->
+      <div class="select-wrap">
+        <select id="typeSelect" multiple onchange="onSelectChange()">
+          <option value="ノーマル">ノーマル</option>
+          <option value="ほのお">ほのお</option>
+          <option value="みず">みず</option>
+          <option value="でんき">でんき</option>
+          <option value="くさ">くさ</option>
+          <option value="こおり">こおり</option>
+          <option value="かくとう">かくとう</option>
+          <option value="どく">どく</option>
+          <option value="じめん">じめん</option>
+          <option value="ひこう">ひこう</option>
+          <option value="エスパー">エスパー</option>
+          <option value="むし">むし</option>
+          <option value="いわ">いわ</option>
+          <option value="ゴースト">ゴースト</option>
+          <option value="ドラゴン">ドラゴン</option>
+          <option value="あく">あく</option>
+          <option value="はがね">はがね</option>
+          <option value="フェアリー">フェアリー</option>
+        </select>
+        <span class="select-hint" id="selectHint">0 / 18 選択中</span>
+      </div>
+
+      <!-- 全選択/解除トグルボタン -->
+      <button id="btnToggleAll" class="btn-sm" onclick="toggleAllTypes()">全選択</button>
+
+      <!-- クイズスタート -->
+      <button class="btn-start" onclick="startQuiz()">▶ クイズ</button>
+    </div>
+  </div>
+
+  <!-- 凡例 + セル情報バー -->
+  <div id="infoBar">
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-box eff2-box"></div><span>○ 2倍</span></div>
+      <div class="legend-item"><div class="legend-box eff05-box"></div><span>△ ½倍</span></div>
+      <div class="legend-item"><div class="legend-box eff0-box"></div><span>× 無効</span></div>
+      <div class="legend-item"><div class="legend-box eff1-box"></div><span>－ 等倍</span></div>
+    </div>
+    <div id="cellInfo"></div>
+  </div>
+
+  <!-- 相性表本体 -->
+  <div class="chart-table-wrap" id="chartTableWrap">
+    <table class="ct" id="chartTable"></table>
+  </div>
+
+</div><!-- /mainView -->
+
+
+<!-- ══════════════════════════════════════════
+     クイズ画面
+════════════════════════════════════════════ -->
+<div id="quizView" style="display:none;">
+  <div id="quizInner">
+    <button class="btn-back" onclick="quitQuiz()">← 戻る</button>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progFill"></div></div>
+    <div class="score-row">
+      <span>問題 <b id="qNum">1</b> / <b id="qTotal">20</b></span>
+      <span>正解 <b id="scoreDisp">0</b></span>
+    </div>
+    <div class="question-card">
+      <div class="q-label">この技のダメージ倍率は？</div>
+      <div class="q-types">
+        <span class="type-badge" id="atkBadge"></span>
+        <span class="q-vs">の技　→</span>
+        <span class="type-badge" id="defBadge"></span>
+        <span class="q-vs">に対して</span>
       </div>
     </div>
-    <div id="cellInfo" style="text-align:center;min-height:22px;font-size:.78rem;color:var(--accent);font-weight:700;margin-bottom:8px;flex-shrink:0;"></div>
-    <div class="chart-table-wrap">
-      <table class="ct" id="chartTable"></table>
-    </div>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">次の問題 →</button>
   </div>
 </div>
 
-<!-- ── クイズ ── -->
-<div id="quiz">
-  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progFill"></div></div>
-  <div class="score-row">
-    <span>問題 <b id="qNum">1</b> / <b id="qTotal">20</b></span>
-    <span>正解 <b id="scoreDisp">0</b></span>
-  </div>
-  <div class="question-card">
-    <div class="q-label">この技のダメージ倍率は？</div>
-    <div class="q-types">
-      <span class="type-badge" id="atkBadge"></span>
-      <span class="q-vs">の技</span>
-      <span class="q-vs">→</span>
-      <span class="type-badge" id="defBadge"></span>
-      <span class="q-vs">に対して</span>
-    </div>
-  </div>
-  <div class="choices" id="choices"></div>
-  <div class="feedback" id="feedback"></div>
-  <button class="btn-next" id="btnNext" onclick="nextQuestion()">次の問題 →</button>
-  <button class="btn-quit" onclick="quitQuiz()">クイズをやめる ✕</button>
-</div>
 
-<!-- ── 結果 ── -->
-<div id="result">
-  <div class="result-score" id="finalScore"></div>
-  <div class="result-label" id="finalLabel"></div>
-  <div class="result-rank"  id="finalRank"></div>
-  <button class="btn-retry" onclick="backToSetup()">もう一度 ↺</button>
+<!-- ══════════════════════════════════════════
+     結果画面
+════════════════════════════════════════════ -->
+<div id="resultView" style="display:none;">
+  <div id="resultInner">
+    <div class="result-score" id="finalScore"></div>
+    <div class="result-label" id="finalLabel"></div>
+    <div class="result-rank"  id="finalRank"></div>
+    <button class="btn-retry" onclick="backToChart()">← 相性表に戻る</button>
+  </div>
 </div>
 
 <script src="script.js"></script>
