@@ -165,7 +165,13 @@ function renderChart() {
     baseCell = 36; selCell = 64;
   }
 
-  // ── thead ──
+  // 攻撃モード: 幅600px以上なら画面幅に合わせて18列収める、スマホ縦は固定幅
+  var cornerW = 56;
+  var wrapW = document.getElementById('chartTableWrap').clientWidth;
+  var atkColW = (wrapW >= 600)
+    ? Math.max(22, Math.floor((wrapW - cornerW) / TYPES.length))
+    : 30;
+
   var thead = document.createElement('thead');
   var hr = document.createElement('tr');
 
@@ -183,8 +189,8 @@ function renderChart() {
     th.className = 'hdr-def' + (defOff ? ' col-dim hdr-off' : '');
     th.id = 'dhdr-' + d;
 
-    // 攻撃モード: 全列同じ幅(selCell)。防御モード: 選択列=selCell、未選択=baseCell
-    var colW = (chartMode === 'atk') ? selCell : (selDef ? selCell : baseCell);
+    // 攻撃モード: 動的計算幅。防御モード: 選択列=selCell、未選択=baseCell
+    var colW = (chartMode === 'atk') ? atkColW : (selDef ? selCell : baseCell);
     th.style.width    = colW + 'px';
     th.style.minWidth = colW + 'px';
 
@@ -244,7 +250,7 @@ function renderChart() {
       // セルの幅・高さ（参照版ロジック）
       var tdW, tdH;
       if (chartMode === 'atk') {
-        tdW = selCell;
+        tdW = atkColW;
         tdH = selAtk ? selCell : baseCell;
       } else {
         tdH = selCell;
@@ -491,3 +497,4 @@ function showView(id) {
 // ── 初期化 ──
 updateToggleAllBtn();
 renderChart();
+window.addEventListener('resize', function() { renderChart(); });
