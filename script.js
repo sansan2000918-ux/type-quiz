@@ -165,13 +165,12 @@ function renderChart() {
     baseCell = 36; selCell = 64;
   }
 
-  // 攻撃モード: 幅600px以上なら画面幅に合わせて18列収める、スマホ縦は固定幅
+  // 全18列を画面内に収めるための動的列幅（600px以上の画面のみ）
   var cornerW = 56;
   var wrap = document.getElementById('chartTableWrap');
   var wrapW = wrap.clientWidth - 20; // スクロールバー分を引く
-  var atkColW = (wrapW >= 580)
-    ? Math.max(22, Math.floor((wrapW - cornerW) / TYPES.length))
-    : 30;
+  var isBigScreen = wrapW >= 580;
+  var dynColW = isBigScreen ? Math.max(22, Math.floor((wrapW - cornerW) / TYPES.length)) : 30;
 
   var thead = document.createElement('thead');
   var hr = document.createElement('tr');
@@ -190,8 +189,16 @@ function renderChart() {
     th.className = 'hdr-def' + (defOff ? ' col-dim hdr-off' : '');
     th.id = 'dhdr-' + d;
 
-    // 攻撃モード: 動的計算幅。防御モード: 選択列=selCell、未選択=baseCell
-    var colW = (chartMode === 'atk') ? atkColW : (selDef ? selCell : baseCell);
+    // 攻撃モード: 動的計算幅で全列均等
+    // 防御モード: 選択あり→選択列=selCell・未選択=baseCell、選択なし→動的計算幅で全列均等
+    var colW;
+    if (chartMode === 'atk') {
+      colW = dynColW;
+    } else if (n === 0) {
+      colW = dynColW;
+    } else {
+      colW = selDef ? selCell : baseCell;
+    }
     th.style.width    = colW + 'px';
     th.style.minWidth = colW + 'px';
 
@@ -251,8 +258,11 @@ function renderChart() {
       // セルの幅・高さ（参照版ロジック）
       var tdW, tdH;
       if (chartMode === 'atk') {
-        tdW = atkColW;
+        tdW = dynColW;
         tdH = selAtk ? selCell : baseCell;
+      } else if (n === 0) {
+        tdW = dynColW;
+        tdH = selCell;
       } else {
         tdH = selCell;
         tdW = selDef2 ? selCell : baseCell;
